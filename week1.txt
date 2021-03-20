@@ -1,0 +1,49 @@
+create table project_details ( projectid int primary key, name text, dos timestamp, guide text);
+cqlsh:students> drop table project_details ;
+cqlsh:students> create table project_details ( project_id int, project_name text, stud_name text, rating double, duration int, primary key(project_id, project_name));
+cqlsh:students> begin batch insert into project_details(project_id, project_name, stud_name, rating, duration) values (1, 'MS', 'Akshay', 4, 222) insert into project_details(project_id, project_name, stud_name, rating, duration) values (2, 'SS', 'Ajay', 3.5, 100) insert into project_details(project_id, project_name, stud_name, rating, duration) values (3, 'KS', 'Arun', 3, 400) insert into project_details(project_id, project_name, stud_name, rating, duration) values (4, 'AS', 'Arjun', 3.4, 500) apply batch;
+cqlsh:students> select * from project_details;
+
+ project_id | project_name | duration | rating | stud_name
+------------+--------------+----------+--------+-----------
+          1 |           MS |      222 |      4 |    Akshay
+          2 |           SS |      100 |    3.5 |      Ajay
+          4 |           AS |      500 |    3.4 |     Arjun
+          3 |           KS |      400 |      3 |      Arun
+
+(4 rows)
+cqlsh:students> select * from project_details where project_id = 1;
+
+ project_id | project_name | duration | rating | stud_name
+------------+--------------+----------+--------+-----------
+          1 |           MS |      222 |      4 |    Akshay
+
+(1 rows)
+cqlsh:students> create index on project_details(stud_name);
+cqlsh:students> select * from project_details where stud_name = 'Akshay';
+
+ project_id | project_name | duration | rating | stud_name
+------------+--------------+----------+--------+-----------
+          1 |           MS |      222 |      4 |    Akshay
+
+(1 rows)
+cqlsh:students> update project_details set stud_name='Karthik' where project_id = 1 and project_name='MS';
+cqlsh:students> select * from project_details;
+
+ project_id | project_name | duration | rating | stud_name
+------------+--------------+----------+--------+-----------
+          1 |           MS |      222 |      4 |   Karthik
+          2 |           SS |      100 |    3.5 |      Ajay
+          4 |           AS |      500 |    3.4 |     Arjun
+          3 |           KS |      400 |      3 |      Arun
+
+(4 rows)
+cqlsh:students> delete from project_details where project_id = 1 and project_name = 'MS';
+cqlsh:students> select * from project_details;
+
+ project_id | project_name | duration | rating | stud_name
+------------+--------------+----------+--------+-----------
+          2 |           SS |      100 |    3.5 |      Ajay
+          4 |           AS |      500 |    3.4 |     Arjun
+          3 |           KS |      400 |      3 |      Arun
+
