@@ -1,0 +1,61 @@
+*****************NOTE: TABLE HAS BEEN NAMED EMPLOYEEINFO BY MISTAKE, IT IS MEANT TO BE LIBRARYINFO********* 
+
+cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE library WITH REPLICATION = {'class':'SimpleStrategy', 'replication_factor':1}
+   ... ;
+cqlsh> use keyspace library
+   ... ;
+Improper use command.
+cqlsh> use keyspace library;
+Improper use command.
+cqlsh> use library;
+cqlsh:library> create table libraryinfo(stud_id int primary key, counter_value counter, designation t[1]+  Stopped                 cqlshdept_name text);
+bmsce@bmsce-Precision-T1700:~$ cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> use library;
+cqlsh:library> update employeeinfo set counter_value = counter_value + 1 where stud_id = 112 and stud_name = 'Boris' and book_name = 'Java' and book_id = 111 and doi = '2002-08-22';
+cqlsh:library> select * from employeeinfo;
+
+ stud_id | stud_name | book_name | book_id | doi                             | counter_value
+---------+-----------+-----------+---------+---------------------------------+---------------
+     112 |     Boris |      Java |     111 | 2002-08-21 18:30:00.000000+0000 |             1
+
+(1 rows)
+cqlsh:library> update employeeinfo set counter_value = counter_value + 1 where stud_id = 113 and stud_name = 'Akshay' and book_name = 'C++' and book_id = 121 and doi = '2002-08-22';
+cqlsh:library> update employeeinfo set counter_value = counter_value + 1 where stud_id = 114 and stud_name = 'Ajay' and book_name = 'C' and book_id = 221 and doi = '2002-08-22';
+cqlsh:library> update employeeinfo set counter_value = counter_value + 2 where stud_id = 115 and stud_name = 'Anil' and book_name = 'BDA' and book_id = 321 and doi = '2002-08-22';
+cqlsh:library> select * from employeeinfo;
+
+ stud_id | stud_name | book_name | book_id | doi                             | counter_value
+---------+-----------+-----------+---------+---------------------------------+---------------
+     114 |      Ajay |         C |     221 | 2002-08-21 18:30:00.000000+0000 |             1
+     113 |    Akshay |       C++ |     121 | 2002-08-21 18:30:00.000000+0000 |             1
+     112 |     Boris |      Java |     111 | 2002-08-21 18:30:00.000000+0000 |             1
+     115 |      Anil |       BDA |     321 | 2002-08-21 18:30:00.000000+0000 |             2
+
+(4 rows)
+cqlsh:library> select * from employeeinfo where counter_value = 2 allow filtering;
+
+ stud_id | stud_name | book_name | book_id | doi                             | counter_value
+---------+-----------+-----------+---------+---------------------------------+---------------
+     115 |      Anil |       BDA |     321 | 2002-08-21 18:30:00.000000+0000 |             2
+
+(1 rows)
+cqlsh:library> copy employeeinfo(stud_id, stud_name, book_name, book_id, doi, counter_value) to '/home/bmsce/Desktop/libraryinfo.csv';
+Using 11 child processes
+
+Starting copy of library.employeeinfo with columns [stud_id, stud_name, book_name, book_id, doi, counter_value].
+Processed: 4 rows; Rate:      28 rows/s; Avg. rate:      28 rows/s
+4 rows exported to 1 files in 0.177 seconds.
+cqlsh:library> copy employeeinfo(stud_id, stud_name, book_name, book_id, doi, counter_value) from '/home/bmsce/Desktop/libraryinfo.csv';
+Using 11 child processes
+
+Starting copy of library.employeeinfo with columns [stud_id, stud_name, book_name, book_id, doi, counter_value].
+Processed: 4 rows; Rate:       6 rows/s; Avg. rate:      10 rows/s
+4 rows imported from 1 files in 0.420 seconds (0 skipped).
+

@@ -1,0 +1,100 @@
+cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.4 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> create keyspace employee with replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+cqlsh> describe keyspaces
+
+students       system_auth  project  system_distributed  system_traces
+system_schema  system       student  employee          
+
+cqlsh> use employee
+   ... ;
+cqlsh:employee> create table employeeinfo(emp_id int primary key, emp_name text, designation text, doj timestamp, salary double, dept_name text);
+cqlsh:employee> describe table employeeinfo
+
+CREATE TABLE employee.employeeinfo (
+    emp_id int PRIMARY KEY,
+    dept_name text,
+    designation text,
+    doj timestamp,
+    emp_name text,
+    salary double
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:employee> begin batch
+            ... insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (1, 'Akshay', 'CEO', '2001-05-05', 212212, 'Corporate');
+            ... insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (2, 'Manav', 'Manager', '2002-05-05', 52242, 'Software');
+            ... insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (3, 'Gokul', 'Architect', '2003-05-05', 75242, 'Security');
+            ... insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (4, 'Anmol', 'Handyman', '2003-06-05', 242, 'Miscellaneous');
+            ... apply batch;
+cqlsh:employee> select * from employeeinfo;
+
+ emp_id | dept_name     | designation | doj                             | emp_name | salary
+--------+---------------+-------------+---------------------------------+----------+------------
+      1 |     Corporate |         CEO | 2001-05-04 18:30:00.000000+0000 |   Akshay | 2.1221e+05
+      2 |      Software |     Manager | 2002-05-04 18:30:00.000000+0000 |    Manav |      52242
+      4 | Miscellaneous |    Handyman | 2003-06-04 18:30:00.000000+0000 |    Anmol |        242
+      3 |      Security |   Architect | 2003-05-04 18:30:00.000000+0000 |    Gokul |      75242
+
+(4 rows)
+cqlsh:employee> begin batch insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (121, 'John', 'CTO', '2000-05-05', 3212212, 'Corporate'); apply batch;
+cqlsh:employee> select * from employeeinfo;
+
+ emp_id | dept_name     | designation | doj                             | emp_name | salary
+--------+---------------+-------------+---------------------------------+----------+------------
+      1 |     Corporate |         CEO | 2001-05-04 18:30:00.000000+0000 |   Akshay | 2.1221e+05
+      2 |      Software |     Manager | 2002-05-04 18:30:00.000000+0000 |    Manav |      52242
+      4 | Miscellaneous |    Handyman | 2003-06-04 18:30:00.000000+0000 |    Anmol |        242
+    121 |     Corporate |         CTO | 2000-05-04 18:30:00.000000+0000 |     John | 3.2122e+06
+      3 |      Security |   Architect | 2003-05-04 18:30:00.000000+0000 |    Gokul |      75242
+
+(5 rows)
+cqlsh:employee> update employeeinfo set emp_name = 'Jack', dept_name = 'Software' where emp_id = 121;
+cqlsh:employee> select * from employeeinfo;
+
+ emp_id | dept_name     | designation | doj                             | emp_name | salary
+--------+---------------+-------------+---------------------------------+----------+------------
+      1 |     Corporate |         CEO | 2001-05-04 18:30:00.000000+0000 |   Akshay | 2.1221e+05
+      2 |      Software |     Manager | 2002-05-04 18:30:00.000000+0000 |    Manav |      52242
+      4 | Miscellaneous |    Handyman | 2003-06-04 18:30:00.000000+0000 |    Anmol |        242
+    121 |      Software |         CTO | 2000-05-04 18:30:00.000000+0000 |     Jack | 3.2122e+06
+      3 |      Security |   Architect | 2003-05-04 18:30:00.000000+0000 |    Gokul |      75242
+
+(5 rows)
+cqlsh:employee> create index on employeeinfo(salary);
+cqlsh:employee> alter table employeeinfo add projects set<text>;
+cqlsh:employee> update employeeinfo set projects = {'Test', 'Start'} where emp_id in(1,2,3,4,121);
+cqlsh:employee> select * from employeeinfo;
+
+ emp_id | dept_name     | designation | doj                             | emp_name | projects          | salary
+--------+---------------+-------------+---------------------------------+----------+-------------------+------------
+      1 |     Corporate |         CEO | 2001-05-04 18:30:00.000000+0000 |   Akshay | {'Start', 'Test'} | 2.1221e+05
+      2 |      Software |     Manager | 2002-05-04 18:30:00.000000+0000 |    Manav | {'Start', 'Test'} |      52242
+      4 | Miscellaneous |    Handyman | 2003-06-04 18:30:00.000000+0000 |    Anmol | {'Start', 'Test'} |        242
+    121 |      Software |         CTO | 2000-05-04 18:30:00.000000+0000 |     Jack | {'Start', 'Test'} | 3.2122e+06
+      3 |      Security |   Architect | 2003-05-04 18:30:00.000000+0000 |    Gokul | {'Start', 'Test'} |      75242
+
+(5 rows)
+cqlsh:employee> begin batch insert into employeeinfo(emp_id, emp_name, designation, doj, salary, dept_name) values (121, 'Boris', 'MTO', '2001-08-05', 12212, 'Corporate') using ttl 120; apply batch;
+cqlsh:employee> select ttl(designation) from employeeinfo where emp_id = 121;
+
+ ttl(designation)
+------------------
+               78
+
+(1 rows)
+
